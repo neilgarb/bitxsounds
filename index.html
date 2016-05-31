@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>BitX</title>
+  </head>
+  <body>
+    <h1>BitX market stream</h1>
+    <ul id="log"></ul>
+    <script>
+
+    var log = document.getElementById('log');
+
+    var url = 'wss://ws.bitx.co/XBTZAR';
+    var websocket = new WebSocket(url);
+    websocket.onopen = function() {
+      console.log('open');
+    };
+    websocket.onmessage = function(msg) {
+      var li = document.createElement('li');
+      li.innerHTML = msg.data;
+      log.insertBefore(li, log.firstChild);
+      var d = JSON.parse(msg.data);
+      if (d.create_update) {
+        if (d.create_update.type == 'ASK') {
+          playAsk(d.create_update.volume);
+        } else if (d.create_update.type == 'BID') {
+          playBid(d.create_update.volume);
+        }
+      } else if (d.trade_updates) {
+        for (var i in d.trade_updates) {
+          if (d.trade_updates.hasOwnProperty(i)) {
+            var t = d.trade_updates[i];
+            playTrade(t.counter);
+          }
+        }
+      } else if (d.delete_update) {
+        playDelete();
+      }
+    };
+
+    var askSound = new Audio('ask.mp3');
+    function playAsk(volume) {
+      askSound.play();
+    }
+
+    var bidSound = new Audio('bid.mp3');
+    function playBid(volume) {
+      bidSound.play();
+    }
+
+    var deleteSound = new Audio('delete.mp3');
+    function playDelete() {
+      deleteSound.play();
+    }
+
+    var tradeSound = new Audio('trade.mp3');
+    function playTrade(volume) {
+      tradeSound.play();
+    }
+    </script>
+  </body>
+</html>
